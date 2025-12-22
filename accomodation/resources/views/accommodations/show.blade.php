@@ -218,7 +218,24 @@
                         <span class="text-gray-600"> FCFA</span>
                         <p class="text-gray-600 text-sm">par nuit</p>
                     </div>
-                    
+
+                    {{-- Messages de succès / erreurs de réservation --}}
+                    @if(session('success'))
+                        <div class="mb-4 rounded-lg bg-green-100 text-green-800 px-4 py-3 text-sm">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-4 rounded-lg bg-red-100 text-red-800 px-4 py-3 text-sm">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('reservations.store') }}" method="POST" id="reservation-form">
                         @csrf
                         <input type="hidden" name="accommodation_id" value="{{ $accommodation->id }}">

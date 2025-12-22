@@ -35,7 +35,7 @@ services:
       MYSQL_DATABASE: accomodation
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3307:3306"   # FIX ICI
+      - "33010:3306"   # FIX ICI
     volumes:
       - dbdata:/var/lib/mysql
     networks:

@@ -7,20 +7,27 @@ use App\Models\Accommodation;
 use App\Models\Reservation;
 use App\Models\Review;
 use App\Models\User;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+
+// Pas besoin d'Inertia
 
 class DashboardController extends Controller
 {
-    //
-     public function index()
+    public function __construct()
     {
-        // // Vérifier que c'est un admin
-        // if (!!FacadesAuth::user()->isAdmin) {
-        //     abort(403);
-        // }
+        // $this->middleware(['auth', 'verified']);
+    }
+
+    /**
+     * Tableau de bord admin
+     */
+    public function index()
+    {
+        // Vérifier que c'est un admin
+        if (!Auth::user()->isAdmin()) {
+            abort(403);
+        }
 
         $stats = [
             'total_users' => User::count(),
@@ -50,12 +57,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('dashboard', [
-            'stats' => $stats,
-            'recentAccommodations' => $recentAccommodations,
-            'recentReservations' => $recentReservations,
-            'recentReviews' => $recentReviews,
-        ]);
+        return view('admin.dashboard', compact('stats', 'recentAccommodations', 'recentReservations', 'recentReviews'));
     }
 
     /**
@@ -63,7 +65,7 @@ class DashboardController extends Controller
      */
     public function accommodations(Request $request)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -90,7 +92,7 @@ class DashboardController extends Controller
      */
     public function verifyAccommodation(Accommodation $accommodation)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -104,7 +106,7 @@ class DashboardController extends Controller
      */
     public function rejectAccommodation(Accommodation $accommodation)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -118,7 +120,7 @@ class DashboardController extends Controller
      */
     public function reviews(Request $request)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -145,7 +147,7 @@ class DashboardController extends Controller
      */
     public function verifyReview(Review $review)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -159,7 +161,7 @@ class DashboardController extends Controller
      */
     public function users(Request $request)
     {
-        if (!!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -184,7 +186,7 @@ class DashboardController extends Controller
      */
     public function toggleUserStatus(User $user)
     {
-        if (!FacadesAuth::user()->isAdmin) {
+        if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 

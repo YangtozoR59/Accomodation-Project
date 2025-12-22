@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Owner\AccommodationController as OwnerAccommodationController;
 use App\Http\Controllers\Owner\ReservationController as OwnerReservationController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,7 +24,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/hebergements', [AccommodationController::class, 'index'])->name('accommodations.index');
 Route::get('/hebergements/{id}', [AccommodationController::class, 'show'])->name('accommodations.show');
 Route::post('/hebergements/{id}/check-availability', [AccommodationController::class, 'checkAvailability'])->name('accommodations.check-availability');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -68,27 +66,23 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified', 'owner'])->prefix('owner')->name('owner.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('owner')->name('owner.')->group(function () {
     
-    // Hébergements
-    Route::prefix('accommodations')->name('accommodations.')->group(function () {
-        Route::get('/', [OwnerAccommodationController::class, 'index'])->name('index');
-        Route::get('/create', [OwnerAccommodationController::class, 'create'])->name('create');
-        Route::post('/', [OwnerAccommodationController::class, 'store'])->name('store');
-        Route::get('/{accommodation}/edit', [OwnerAccommodationController::class, 'edit'])->name('edit');
-        Route::patch('/{accommodation}', [OwnerAccommodationController::class, 'update'])->name('update');
-        Route::delete('/{accommodation}', [OwnerAccommodationController::class, 'destroy'])->name('destroy');
-        
-        // Gestion des images
-        Route::delete('/images/{image}', [OwnerAccommodationController::class, 'deleteImage'])->name('images.delete');
-        Route::patch('/images/{image}/set-primary', [OwnerAccommodationController::class, 'setPrimaryImage'])->name('images.set-primary');
-    });
+    // Hébergements - Vérifier qu'on est propriétaire dans le controller
+    Route::get('/accommodations', [OwnerAccommodationController::class, 'index'])->name('accommodations.index');
+    Route::get('/accommodations/create', [OwnerAccommodationController::class, 'create'])->name('accommodations.create');
+    Route::post('/accommodations', [OwnerAccommodationController::class, 'store'])->name('accommodations.store');
+    Route::get('/accommodations/{accommodation}/edit', [OwnerAccommodationController::class, 'edit'])->name('accommodations.edit');
+    Route::patch('/accommodations/{accommodation}', [OwnerAccommodationController::class, 'update'])->name('accommodations.update');
+    Route::delete('/accommodations/{accommodation}', [OwnerAccommodationController::class, 'destroy'])->name('accommodations.destroy');
+    
+    // Gestion des images
+    Route::delete('/accommodations/images/{image}', [OwnerAccommodationController::class, 'deleteImage'])->name('accommodations.images.delete');
+    Route::patch('/accommodations/images/{image}/set-primary', [OwnerAccommodationController::class, 'setPrimaryImage'])->name('accommodations.images.set-primary');
 
     // Réservations
-    Route::prefix('reservations')->name('reservations.')->group(function () {
-        Route::get('/', [OwnerReservationController::class, 'index'])->name('index');
-        Route::get('/{reservation}', [OwnerReservationController::class, 'show'])->name('show');
-    });
+    Route::get('/reservations', [OwnerReservationController::class, 'index'])->name('reservations.index');
+    Route::get('/reservations/{reservation}', [OwnerReservationController::class, 'show'])->name('reservations.show');
 });
 
 /*
@@ -101,6 +95,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     
     // Dashboard admin
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // Gestion des catégories
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
     
     // Gestion des hébergements
     Route::get('/accommodations', [AdminDashboardController::class, 'accommodations'])->name('accommodations');
@@ -115,6 +112,5 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
     Route::patch('/users/{user}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])->name('users.toggle-status');
 });
-
 
 require __DIR__.'/auth.php';

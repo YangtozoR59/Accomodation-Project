@@ -10,54 +10,61 @@ use App\Models\Reservation;
 use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// Pas besoin d'Inertia
 use Illuminate\Support\Facades\Storage;
 
 class AccommodationController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware(['auth', 'verified']);
-    // }
-
-    public function index()
+    public function __construct()
     {
-        $userId = Auth::id();
-        $accommodations = Accommodation::where('user_id', $userId)
+        // $this->middleware(['auth', 'verified']);
+    }
+
+    /**
+     * Afficher mes hébergements (avec dashboard)
+     */
+    public function index(Request $request)
+    {
+        // Vérifier que l'utilisateur est propriétaire ou admin
+        if (!Auth::user()->isOwner() && !Auth::user()->isAdmin()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Vous devez être propriétaire pour accéder à cette page.');
+        }
+
+        $accommodations = Accommodation::where('user_id', Auth::id())
             ->with(['category', 'images'])
             ->withCount('reservations')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
         
         // Statistiques pour le dashboard
         $stats = [
-            'total_accommodations' => Accommodation::where('user_id', $userId)->count(),
-            'verified_accommodations' => Accommodation::where('user_id', $userId)->where('is_verified', true)->count(),
-            'month_reservations' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))
+            'total_accommodations' => Accommodation::where('user_id', Auth::id())->count(),
+            'verified_accommodations' => Accommodation::where('user_id', Auth::id())->where('is_verified', true)->count(),
+            'month_reservations' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))
                 ->whereMonth('created_at', now()->month)->count(),
-            'pending_reservations' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))
+            'pending_reservations' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))
                 ->where('status', 'pending')->count(),
-            'month_revenue' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))
+            'month_revenue' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))
                 ->whereMonth('created_at', now()->month)
                 ->whereIn('status', ['confirmed', 'completed'])->sum('total_price'),
-            'total_revenue' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))
+            'total_revenue' => Reservation::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))
                 ->whereIn('status', ['confirmed', 'completed'])->sum('total_price'),
-            'average_rating' => Review::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))->avg('rating') ?? 0,
-            'total_reviews' => Review::whereHas('accommodation', fn($q) => $q->where('user_id', $userId))->count(),
+            'average_rating' => Review::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))->avg('rating') ?? 0,
+            'total_reviews' => Review::whereHas('accommodation', fn($q) => $q->where('user_id', Auth::id()))->count(),
         ];
+        
         // Réservations récentes
-        $recentReservations = Reservation::whereHas('accommodation', function($q) use ($userId) {
-            $q->where('user_id', $userId);
+        $recentReservations = Reservation::whereHas('accommodation', function($q) {
+            $q->where('user_id', Auth::id());
         })->with(['user', 'accommodation'])
             ->latest()
             ->take(5)
             ->get();
         
         // Top hébergements
-        $topAccommodations = Accommodation::where('user_id', $userId)
+        $topAccommodations = Accommodation::where('user_id', Auth::id())
             ->with(['images'])
             ->withCount(['reservations', 'reviews'])
-            ->withAvg('reviews', 'rating')
             ->orderBy('reservations_count', 'desc')
             ->take(5)
             ->get();
@@ -70,6 +77,11 @@ class AccommodationController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->isOwner() && !Auth::user()->isAdmin()) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Vous devez être propriétaire pour ajouter un hébergement.');
+        }
+
         return view('owner.accommodations.create', [
             'categories' => Category::all(),
         ]);
@@ -80,58 +92,59 @@ class AccommodationController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price_per_night' => 'required|numeric|min:0',
             'address' => 'required|string|max:255',
             'quartier' => 'required|string|max:100',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'nb_rooms' => 'required|integer|min:1',
             'nb_beds' => 'required|integer|min:1',
             'nb_bathrooms' => 'required|integer|min:1',
             'max_guests' => 'required|integer|min:1',
             'amenities' => 'nullable|array',
-            'images.*' => 'nullable|image|max:2048', // Max 2MB par image
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-        $id = Auth::id();
+
         // Créer l'hébergement
         $accommodation = Accommodation::create([
-            'user_id' => $id,
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'price_per_night' => $request->price_per_night,
-            'address' => $request->address,
-            'quartier' => $request->quartier,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'nb_rooms' => $request->nb_rooms,
-            'nb_beds' => $request->nb_beds,
-            'nb_bathrooms' => $request->nb_bathrooms,
-            'max_guests' => $request->max_guests,
-            'amenities' => $request->amenities,
+            'user_id' => Auth::id(),
+            'category_id' => $validated['category_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'price_per_night' => $validated['price_per_night'],
+            'address' => $validated['address'],
+            'quartier' => $validated['quartier'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'nb_rooms' => $validated['nb_rooms'],
+            'nb_beds' => $validated['nb_beds'],
+            'nb_bathrooms' => $validated['nb_bathrooms'],
+            'max_guests' => $validated['max_guests'],
+            'amenities' => $validated['amenities'] ?? [],
             'is_available' => true,
-            'is_verified' => false, // Doit être vérifié par l'admin
+            'is_verified' => false,
         ]);
+
         // Gérer les images
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store("accommodations/{$accommodation->id}", 'public');
+            foreach ($request->file('images') as $index => $imageFile) {
+                $path = $imageFile->store('accommodations/' . $accommodation->id, 'public');
                 
                 Image::create([
                     'accommodation_id' => $accommodation->id,
                     'path' => $path,
-                    'is_primary' => $index === 0, // La première image est l'image principale
+                    'is_primary' => $index === 0,
                     'order' => $index,
                 ]);
             }
         }
-            
-        
 
         return redirect()->route('owner.accommodations.index')
-            ->with('success', 'Votre hébergement a été créé et sera vérifié par un administrateur.');
+            ->with('success', 'Hébergement créé avec succès ! Il sera vérifié par un administrateur.');
     }
 
     /**
@@ -140,8 +153,8 @@ class AccommodationController extends Controller
     public function edit(Accommodation $accommodation)
     {
         // Vérifier que c'est bien le propriétaire
-        if ($accommodation->user_id !== Auth::id()) {
-            abort(403);
+        if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
+            abort(403, 'Vous n\'avez pas accès à cet hébergement.');
         }
 
         $accommodation->load('images');
@@ -158,48 +171,51 @@ class AccommodationController extends Controller
     public function update(Request $request, Accommodation $accommodation)
     {
         // Vérifier que c'est bien le propriétaire
-        if ($accommodation->user_id !== Auth::id()) {
-            abort(403);
+        if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
+            abort(403, 'Vous n\'avez pas accès à cet hébergement.');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price_per_night' => 'required|numeric|min:0',
             'address' => 'required|string|max:255',
             'quartier' => 'required|string|max:100',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'nb_rooms' => 'required|integer|min:1',
             'nb_beds' => 'required|integer|min:1',
             'nb_bathrooms' => 'required|integer|min:1',
             'max_guests' => 'required|integer|min:1',
             'amenities' => 'nullable|array',
-            'is_available' => 'boolean',
-            'new_images.*' => 'nullable|image|max:2048',
+            'is_available' => 'nullable|boolean',
+            'new_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $accommodation->update([
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'price_per_night' => $request->price_per_night,
-            'address' => $request->address,
-            'quartier' => $request->quartier,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'nb_rooms' => $request->nb_rooms,
-            'nb_beds' => $request->nb_beds,
-            'nb_bathrooms' => $request->nb_bathrooms,
-            'max_guests' => $request->max_guests,
-            'amenities' => $request->amenities,
-            'is_available' => $request->is_available ?? true,
+            'category_id' => $validated['category_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'price_per_night' => $validated['price_per_night'],
+            'address' => $validated['address'],
+            'quartier' => $validated['quartier'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'nb_rooms' => $validated['nb_rooms'],
+            'nb_beds' => $validated['nb_beds'],
+            'nb_bathrooms' => $validated['nb_bathrooms'],
+            'max_guests' => $validated['max_guests'],
+            'amenities' => $validated['amenities'] ?? [],
+            'is_available' => $request->has('is_available') ? true : false,
         ]);
+
         // Ajouter de nouvelles images
         if ($request->hasFile('new_images')) {
             $lastOrder = $accommodation->images()->max('order') ?? -1;
             
-            foreach ($request->file('new_images') as $index => $image) {
-                $path = $image->store("accommodations/{$accommodation->id}", 'public');
+            foreach ($request->file('new_images') as $index => $imageFile) {
+                $path = $imageFile->store('accommodations/' . $accommodation->id, 'public');
                 
                 Image::create([
                     'accommodation_id' => $accommodation->id,
@@ -209,11 +225,9 @@ class AccommodationController extends Controller
                 ]);
             }
         }
-            
-        
 
         return redirect()->route('owner.accommodations.index')
-            ->with('success', 'Votre hébergement a été mis à jour.');
+            ->with('success', 'Hébergement mis à jour avec succès !');
     }
 
     /**
@@ -222,7 +236,7 @@ class AccommodationController extends Controller
     public function destroy(Accommodation $accommodation)
     {
         // Vérifier que c'est bien le propriétaire
-        if ($accommodation->user_id !== Auth::id()) {
+        if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -232,9 +246,7 @@ class AccommodationController extends Controller
             ->exists();
 
         if ($hasActiveReservations) {
-            return back()->withErrors([
-                'error' => 'Impossible de supprimer cet hébergement car il a des réservations actives.'
-            ]);
+            return back()->with('error', 'Impossible de supprimer cet hébergement car il a des réservations actives.');
         }
 
         // Supprimer les images du stockage
@@ -245,7 +257,7 @@ class AccommodationController extends Controller
         $accommodation->delete();
 
         return redirect()->route('owner.accommodations.index')
-            ->with('success', 'Votre hébergement a été supprimé.');
+            ->with('success', 'Hébergement supprimé avec succès.');
     }
 
     /**
@@ -254,14 +266,14 @@ class AccommodationController extends Controller
     public function deleteImage(Image $image)
     {
         // Vérifier que c'est bien le propriétaire
-        if ($image->accommodation->user_id !== Auth::id()) {
+        if ($image->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
         }
 
         Storage::disk('public')->delete($image->path);
         $image->delete();
 
-        return back()->with('success', 'L\'image a été supprimée.');
+        return back()->with('success', 'Image supprimée avec succès.');
     }
 
     /**
@@ -270,7 +282,7 @@ class AccommodationController extends Controller
     public function setPrimaryImage(Image $image)
     {
         // Vérifier que c'est bien le propriétaire
-        if ($image->accommodation->user_id !== Auth::id()) {
+        if ($image->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -280,6 +292,6 @@ class AccommodationController extends Controller
         // Définir cette image comme principale
         $image->update(['is_primary' => true]);
 
-        return back()->with('success', 'Image principale définie.');
+        return back()->with('success', 'Image principale définie avec succès.');
     }
 }
