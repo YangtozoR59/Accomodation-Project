@@ -32,6 +32,22 @@
             
             <form action="{{ route('owner.accommodations.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                 @csrf
+                @if ($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <strong>Erreurs :</strong>
+        <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ session('error') }}
+    </div>
+@endif
                 
                 <!-- Informations de base -->
                 <div class="bg-white rounded-xl shadow-lg p-6 fade-in">

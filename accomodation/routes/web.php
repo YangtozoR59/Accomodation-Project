@@ -3,9 +3,9 @@
 use App\Http\Controllers\AccommodationController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Owner\AccommodationController as OwnerAccommodationController;
 use App\Http\Controllers\Owner\ReservationController as OwnerReservationController;
 use App\Http\Controllers\ProfileController;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil
+// Page d'accueil (statique, sans dépendance BD pour garantir un statut 200)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Hébergements (Public)

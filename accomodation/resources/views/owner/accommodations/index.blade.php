@@ -29,16 +29,17 @@
 </section>
 
 <!-- Navigation -->
+<!-- Navigation -->
 <section class="bg-white shadow-md sticky top-16 z-40">
     <div class="container mx-auto px-4">
         <div class="flex gap-6 overflow-x-auto">
             <a href="{{ route('owner.accommodations.index') }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent hover:border-accent transition whitespace-nowrap">
                 <i class="fas fa-home mr-2"></i> Tableau de bord
             </a>
-            <a href="{{ route('owner.accommodations.edit', ['list' => 1]) }}" class="py-4 px-2 border-b-2 border-accent text-accent font-semibold whitespace-nowrap">
+            <a href="{{ route('owner.accommodations.index', ['list' => 1]) }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent hover:border-accent transition whitespace-nowrap">
                 <i class="fas fa-building mr-2"></i> Mes hébergements
             </a>
-            <a href="{{ route('owner.reservations.index') }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent hover:border-accent transition whitespace-nowrap">
+            <a href="{{ route('owner.reservations.index') }}" class="py-4 px-2 border-b-2 border-accent text-accent font-semibold whitespace-nowrap">
                 <i class="fas fa-calendar-alt mr-2"></i> Réservations
             </a>
         </div>
@@ -56,8 +57,13 @@
                     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover-lift fade-in">
                         <!-- Image -->
                         <div class="relative h-48 bg-gray-200">
-                            @if($accommodation->primary_image)
-                                <img src="{{ asset('storage/' . $accommodation->primary_image->path) }}" 
+                            @php
+                                $primaryImage = $accommodation->images->where('is_primary', true)->first() 
+                                             ?? $accommodation->images->first();
+                            @endphp
+                            
+                            @if($primaryImage)
+                                <img src="{{ asset('storage/' . $primaryImage->path) }}" 
                                      alt="{{ $accommodation->title }}"
                                      class="w-full h-full object-cover">
                             @else
@@ -115,15 +121,20 @@
                             <div class="grid grid-cols-3 gap-2 mb-4">
                                 <div class="text-center p-2 bg-gray-50 rounded">
                                     <i class="fas fa-eye text-accent text-sm"></i>
-                                    <p class="text-xs text-gray-600 mt-1">{{ $accommodation->views_count }}</p>
+                                    <p class="text-xs text-gray-600 mt-1">{{ $accommodation->views_count ?? 0 }}</p>
                                 </div>
                                 <div class="text-center p-2 bg-gray-50 rounded">
                                     <i class="fas fa-calendar-check text-accent text-sm"></i>
-                                    <p class="text-xs text-gray-600 mt-1">{{ $accommodation->reservations_count }}</p>
+                                    <p class="text-xs text-gray-600 mt-1">{{ $accommodation->reservations_count ?? 0 }}</p>
                                 </div>
                                 <div class="text-center p-2 bg-gray-50 rounded">
                                     <i class="fas fa-star text-yellow-400 text-sm"></i>
-                                    <p class="text-xs text-gray-600 mt-1">{{ number_format($accommodation->average_rating, 1) }}</p>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        @php
+                                            $avgRating = $accommodation->reviews->avg('rating') ?? 0;
+                                        @endphp
+                                        {{ number_format($avgRating, 1) }}
+                                    </p>
                                 </div>
                             </div>
                             
@@ -135,17 +146,20 @@
                             
                             <!-- Actions -->
                             <div class="flex gap-2">
-                                <a href="{{ route('accommodations.show', $accommodation) }}" 
-                                   class="flex-1 text-center bg-accent/10 text-accent px-3 py-2 rounded-lg hover:bg-accent hover:text-white transition text-sm">
+                                <a href="{{ route('accommodations.show', $accommodation->id) }}" 
+                                   class="flex-1 text-center bg-accent/10 text-accent px-3 py-2 rounded-lg hover:bg-accent hover:text-white transition text-sm"
+                                   title="Voir">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ route('owner.accommodations.edit', $accommodation) }}" 
-                                   class="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition text-sm">
+                                <a href="{{ route('owner.accommodations.edit', $accommodation->id) }}" 
+                                   class="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition text-sm"
+                                   title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button 
                                     onclick="confirmDelete({{ $accommodation->id }})" 
-                                    class="flex-1 bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition text-sm">
+                                    class="flex-1 bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition text-sm"
+                                    title="Supprimer">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -153,18 +167,13 @@
                     </div>
                 @endforeach
             </div>
-            
-            <!-- Pagination -->
-            <div class="mt-8">
-                {{ $accommodations->links() }}
-            </div>
         @else
             <!-- Aucun hébergement -->
             <div class="bg-white rounded-xl shadow-lg p-12 text-center fade-in">
                 <i class="fas fa-building text-6xl text-gray-300 mb-4"></i>
                 <h3 class="text-2xl font-bold text-gray-700 mb-2">Aucun hébergement</h3>
                 <p class="text-gray-600 mb-6">Commencez par ajouter votre premier hébergement</p>
-                <a href="{{ route('owner.accommodations.create') }}" class="btn-primary text-white px-8 py-3 rounded-lg inline-block">
+                <a href="{{ route('owner.accommodations.create') }}" class="bg-accent text-white px-8 py-3 rounded-lg inline-block hover:bg-dark transition">
                     <i class="fas fa-plus mr-2"></i> Ajouter un hébergement
                 </a>
             </div>
@@ -218,6 +227,14 @@
         document.getElementById('delete-modal').classList.add('hidden');
     }
     
+    // Fermer le modal en cliquant en dehors
+    document.getElementById('delete-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+    
+    // Fermer avec la touche Escape
     document.addEventListener('keydown', function(e) {
         if(e.key === 'Escape') {
             closeDeleteModal();

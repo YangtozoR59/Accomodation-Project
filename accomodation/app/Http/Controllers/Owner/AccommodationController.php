@@ -11,12 +11,13 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AccommodationController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware(['auth', 'verified']);
+        // $this->middleware(['auth', 'verified']); // ✅ DÉCOMMENTÉ
     }
 
     /**
@@ -55,7 +56,7 @@ class AccommodationController extends Controller
         
         // Réservations récentes
         $recentReservations = Reservation::whereHas('accommodation', function($q) {
-            $q->where('user_id', Auth::id());
+            $q->where('user_id', operator: Auth::id());
         })->with(['user', 'accommodation'])
             ->latest()
             ->take(5)
@@ -82,9 +83,9 @@ class AccommodationController extends Controller
                 ->with('error', 'Vous devez être propriétaire pour ajouter un hébergement.');
         }
 
-        return view('owner.accommodations.create', [
-            'categories' => Category::all(),
-        ]);
+        $categories = Category::all();
+        
+        return view('owner.accommodations.create', compact('categories'));
     }
 
     /**
@@ -92,84 +93,108 @@ class AccommodationController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price_per_night' => 'required|numeric|min:0',
-            'address' => 'required|string|max:255',
-            'quartier' => 'required|string|max:100',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'nb_rooms' => 'required|integer|min:1',
-            'nb_beds' => 'required|integer|min:1',
-            'nb_bathrooms' => 'required|integer|min:1',
-            'max_guests' => 'required|integer|min:1',
-            'amenities' => 'nullable|array',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+        try {
+            // Validation
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'price_per_night' => 'required|numeric|min:0',
+                'address' => 'required|string|max:255',
+                'quartier' => 'required|string|max:100',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
+                'nb_rooms' => 'required|integer|min:1',
+                'nb_beds' => 'required|integer|min:1',
+                'nb_bathrooms' => 'required|integer|min:1',
+                'max_guests' => 'required|integer|min:1',
+                'amenities' => 'nullable|array',
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
+            ]);
 
-        // Créer l'hébergement
-        $accommodation = Accommodation::create([
-            'user_id' => Auth::id(),
-            'category_id' => $validated['category_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'price_per_night' => $validated['price_per_night'],
-            'address' => $validated['address'],
-            'quartier' => $validated['quartier'],
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'nb_rooms' => $validated['nb_rooms'],
-            'nb_beds' => $validated['nb_beds'],
-            'nb_bathrooms' => $validated['nb_bathrooms'],
-            'max_guests' => $validated['max_guests'],
-            'amenities' => $validated['amenities'] ?? [],
-            'is_available' => true,
-            'is_verified' => false,
-        ]);
+            // Créer l'hébergement
+            $accommodation = Accommodation::create([
+                'user_id' => Auth::id(),
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'price_per_night' => $validated['price_per_night'],
+                'address' => $validated['address'],
+                'quartier' => $validated['quartier'],
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'nb_rooms' => $validated['nb_rooms'],
+                'nb_beds' => $validated['nb_beds'],
+                'nb_bathrooms' => $validated['nb_bathrooms'],
+                'max_guests' => $validated['max_guests'],
+                'amenities' => $request->amenities ?? [],
+                'is_available' => true,
+                'is_verified' => false,
+            ]);
 
-        // Gérer les images
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $imageFile) {
-                $path = $imageFile->store('accommodations/' . $accommodation->id, 'public');
+            // Gérer les images
+            if ($request->hasFile('images')) {
+                $images = $request->file('images');
                 
-                Image::create([
-                    'accommodation_id' => $accommodation->id,
-                    'path' => $path,
-                    'is_primary' => $index === 0,
-                    'order' => $index,
-                ]);
+                foreach ($images as $index => $imageFile) {
+                    if ($imageFile->isValid()) {
+                        // Stocker l'image
+                        $path = $imageFile->store('accommodations/' . $accommodation->id, 'public');
+                        
+                        // Créer l'enregistrement
+                        Image::create([
+                            'accommodation_id' => $accommodation->id,
+                            'path' => $path,
+                            'is_primary' => $index === 0,
+                            'order' => $index,
+                        ]);
+                    }
+                }
             }
-        }
 
-        return redirect()->route('owner.accommodations.index')
-            ->with('success', 'Hébergement créé avec succès ! Il sera vérifié par un administrateur.');
+            return redirect()->route('owner.accommodations.index')
+                ->with('success', 'Hébergement créé avec succès ! Il sera vérifié par un administrateur.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Erreur de validation
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
+                
+        } catch (\Exception $e) {
+            // Autre erreur
+            Log::error('Erreur création hébergement: ' . $e->getMessage());
+            
+            return back()
+                ->with('error', 'Une erreur est survenue lors de la création de l\'hébergement: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
      * Formulaire de modification
      */
-    public function edit(Accommodation $accommodation)
+    public function edit($id)
     {
+        $accommodation = Accommodation::with('images')->findOrFail($id);
+        
         // Vérifier que c'est bien le propriétaire
         if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'avez pas accès à cet hébergement.');
         }
 
-        $accommodation->load('images');
+        $categories = Category::all();
 
-        return view('owner.accommodations.edit', [
-            'accommodation' => $accommodation,
-            'categories' => Category::all(),
-        ]);
+        return view('owner.accommodations.edit', compact('accommodation', 'categories'));
     }
 
     /**
      * Mettre à jour un hébergement
      */
-    public function update(Request $request, Accommodation $accommodation)
+    public function update(Request $request, $id)
     {
+        $accommodation = Accommodation::findOrFail($id);
+        
         // Vérifier que c'est bien le propriétaire
         if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'avez pas accès à cet hébergement.');
@@ -190,7 +215,7 @@ class AccommodationController extends Controller
             'max_guests' => 'required|integer|min:1',
             'amenities' => 'nullable|array',
             'is_available' => 'nullable|boolean',
-            'new_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'new_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:10240', // 10MB
         ]);
 
         $accommodation->update([
@@ -233,8 +258,10 @@ class AccommodationController extends Controller
     /**
      * Supprimer un hébergement
      */
-    public function destroy(Accommodation $accommodation)
+    public function destroy($id)
     {
+        $accommodation = Accommodation::findOrFail($id);
+        
         // Vérifier que c'est bien le propriétaire
         if ($accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
@@ -263,8 +290,10 @@ class AccommodationController extends Controller
     /**
      * Supprimer une image
      */
-    public function deleteImage(Image $image)
+    public function deleteImage($id)
     {
+        $image = Image::findOrFail($id);
+        
         // Vérifier que c'est bien le propriétaire
         if ($image->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
@@ -279,8 +308,10 @@ class AccommodationController extends Controller
     /**
      * Définir une image comme principale
      */
-    public function setPrimaryImage(Image $image)
+    public function setPrimaryImage($id)
     {
+        $image = Image::findOrFail($id);
+        
         // Vérifier que c'est bien le propriétaire
         if ($image->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);

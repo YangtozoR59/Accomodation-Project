@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
     networks:
       - laravel
     depends_on:
@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./:/var/www
+      - ./:/var/www:cached
       - ./docker/nginx:/etc/nginx/conf.d
     networks:
       - laravel
@@ -35,7 +35,7 @@ services:
       MYSQL_DATABASE: accomodation
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "33010:3306"   # FIX ICI
+      - "33010:3306"
     volumes:
       - dbdata:/var/lib/mysql
     networks:
@@ -46,7 +46,7 @@ services:
     container_name: laravel_phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db       # FIX ICI
+      PMA_HOST: db
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: root
     ports:

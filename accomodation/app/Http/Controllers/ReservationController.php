@@ -51,7 +51,8 @@ class ReservationController extends Controller
         $accommodation = Accommodation::findOrFail($request->accommodation_id);
 
         // Vérifier que l'hébergement est disponible
-        if (!$accommodation->is_available || !$accommodation->is_verified) {
+        // On ne bloque plus sur la vérification admin ici, seulement sur la disponibilité
+        if (!$accommodation->is_available) {
             return back()->withErrors(['error' => 'Cet hébergement n\'est pas disponible.']);
         }
 
@@ -109,15 +110,13 @@ class ReservationController extends Controller
         // Vérifier que l'utilisateur a le droit de voir cette réservation
         if ($reservation->user_id !== Auth::id() && 
             $reservation->accommodation->user_id !== Auth::id() &&
-            !Auth::user()->isAdmin) {
+            !Auth::user()->isAdmin()) {
             abort(403);
         }
 
         $reservation->load(['accommodation.images', 'accommodation.owner', 'user']);
 
-        return Inertia::render('Reservations/Show', [
-            'reservation' => $reservation,
-        ]);
+        return view('reservations.show', compact('reservation'));
     }
 
     /**
@@ -154,7 +153,7 @@ class ReservationController extends Controller
     public function confirm(Reservation $reservation)
     {
         // Vérifier que c'est le propriétaire
-        if ($reservation->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin) {
+        if ($reservation->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
         }
 
@@ -173,7 +172,7 @@ class ReservationController extends Controller
     public function complete(Reservation $reservation)
     {
         // Vérifier que c'est le propriétaire
-        if ($reservation->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin) {
+        if ($reservation->accommodation->user_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403);
         }
 

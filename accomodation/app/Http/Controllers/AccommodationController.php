@@ -77,7 +77,7 @@ class AccommodationController extends Controller
             }
         }
 
-        $accommodations = $query->paginate(12)->withQueryString();
+        $accommodations = Accommodation::all();
 
         return view('accommodations.index', [
             'accommodations' => $accommodations,
