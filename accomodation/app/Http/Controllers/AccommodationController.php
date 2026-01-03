@@ -17,22 +17,22 @@ class AccommodationController extends Controller
     {
         $query = Accommodation::with(['category', 'owner', 'images'])
             ->orderBy('created_at', 'desc');
-
+    
         // Recherche par mot-clé
         if ($request->filled('search')) {
             $query->search($request->search);
         }
-
+    
         // Filtrer par catégorie
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
         }
-
+    
         // Filtrer par quartier
         if ($request->filled('quartier')) {
             $query->where('quartier', 'ILIKE', '%' . $request->quartier . '%');
         }
-
+    
         // Filtrer par prix
         if ($request->filled('min_price')) {
             $query->where('price_per_night', '>=', $request->min_price);
@@ -40,17 +40,17 @@ class AccommodationController extends Controller
         if ($request->filled('max_price')) {
             $query->where('price_per_night', '<=', $request->max_price);
         }
-
+    
         // Filtrer par nombre de chambres
         if ($request->filled('nb_rooms')) {
             $query->where('nb_rooms', '>=', $request->nb_rooms);
         }
-
+    
         // Filtrer par nombre d'invités
         if ($request->filled('nb_guests')) {
             $query->where('max_guests', '>=', $request->nb_guests);
         }
-
+    
         // Filtrer par équipements
         if ($request->filled('amenities')) {
             $amenities = is_array($request->amenities) 
@@ -61,7 +61,7 @@ class AccommodationController extends Controller
                 $query->whereJsonContains('amenities', $amenity);
             }
         }
-
+    
         // Trier
         if ($request->filled('sort')) {
             switch ($request->sort) {
@@ -76,9 +76,10 @@ class AccommodationController extends Controller
                     break;
             }
         }
-
-        $accommodations = Accommodation::all();
-
+    
+        // ✅ CORRECTION ICI - Utiliser $query au lieu de Accommodation::all()
+        $accommodations = $query->paginate(12);
+    
         return view('accommodations.index', [
             'accommodations' => $accommodations,
             'categories' => Category::all(),

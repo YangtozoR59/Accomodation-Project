@@ -4,162 +4,179 @@
 
 @section('content')
 
-<section class="bg-gradient-to-r from-dark to-accent py-12">
-    <div class="container mx-auto px-4">
-        <h1 class="text-4xl font-bold text-white fade-in">
-            <i class="fas fa-users mr-2"></i> Gestion des utilisateurs
-        </h1>
+<!-- Header -->
+<section class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-16 relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-10 left-20 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-float" style="animation-delay: 3s"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-3 flex items-center gap-3">
+                <i class="fas fa-users text-purple-400"></i> Gestion des utilisateurs
+            </h1>
+            <p class="text-white/80 text-lg">Gérer tous les utilisateurs de la plateforme</p>
+        </div>
     </div>
 </section>
 
-<section class="bg-white shadow-md sticky top-16 z-40">
+<!-- Navigation Admin -->
+<section class="sticky top-16 z-40 mb-8" style="margin-top: -30px;">
     <div class="container mx-auto px-4">
-        <div class="flex gap-6 overflow-x-auto">
-            <a href="{{ route('admin.dashboard') }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent transition whitespace-nowrap">
-                <i class="fas fa-tachometer-alt mr-2"></i> Aperçu
+        <div class="glass-card bg-white/90 backdrop-blur-xl p-2 rounded-2xl shadow-lg border border-white/40 flex gap-2 overflow-x-auto no-scrollbar">
+            <a href="{{ route('admin.dashboard') }}" 
+               class="px-6 py-3 rounded-xl text-gray-600 hover:text-primary hover:bg-gray-100/50 font-medium transition whitespace-nowrap flex items-center gap-2">
+                <i class="fas fa-chart-line"></i> Tableau de bord
             </a>
-            <a href="{{ route('admin.accommodations') }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent transition whitespace-nowrap">
-                <i class="fas fa-building mr-2"></i> Hébergements
+            <a href="{{ route('admin.accommodations') }}" 
+               class="px-6 py-3 rounded-xl text-gray-600 hover:text-primary hover:bg-gray-100/50 font-medium transition whitespace-nowrap flex items-center gap-2">
+                <i class="fas fa-building"></i> Hébergements
             </a>
-            <a href="{{ route('admin.reviews') }}" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-accent transition whitespace-nowrap">
-                <i class="fas fa-star mr-2"></i> Avis
+            <a href="{{ route('admin.reviews') }}" 
+               class="px-6 py-3 rounded-xl text-gray-600 hover:text-primary hover:bg-gray-100/50 font-medium transition whitespace-nowrap flex items-center gap-2">
+                <i class="fas fa-star"></i> Avis
             </a>
-            <a href="{{ route('admin.users') }}" class="py-4 px-2 border-b-2 border-accent text-accent font-semibold whitespace-nowrap">
-                <i class="fas fa-users mr-2"></i> Utilisateurs
+            <a href="{{ route('admin.users') }}" 
+               class="px-6 py-3 rounded-xl bg-gray-900 text-white font-bold whitespace-nowrap flex items-center gap-2 shadow-lg shadow-gray-900/20">
+                <i class="fas fa-users"></i> Utilisateurs
+            </a>
+            <a href="{{ route('admin.categories.index') }}" 
+               class="px-6 py-3 rounded-xl text-gray-600 hover:text-primary hover:bg-gray-100/50 font-medium transition whitespace-nowrap flex items-center gap-2">
+                <i class="fas fa-tags"></i> Catégories
             </a>
         </div>
     </div>
 </section>
 
-<section class="py-8">
+<!-- Contenu Principal -->
+<section class="pb-12 pt-4 bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4">
         
         <!-- Filtres -->
-        <div class="bg-white rounded-xl shadow-md p-4 mb-8 fade-in">
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.users') }}" 
-                   class="px-4 py-2 rounded-lg {{ !request('role') ? 'bg-accent text-white' : 'bg-gray-100 text-gray-700' }} hover:opacity-80 transition">
-                    <i class="fas fa-list mr-2"></i> Tous
-                </a>
-                <a href="{{ route('admin.users', ['role' => 'user']) }}" 
-                   class="px-4 py-2 rounded-lg {{ request('role') === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700' }} hover:opacity-80 transition">
-                    <i class="fas fa-user mr-2"></i> Utilisateurs
-                </a>
-                <a href="{{ route('admin.users', ['role' => 'owner']) }}" 
-                   class="px-4 py-2 rounded-lg {{ request('role') === 'owner' ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-700' }} hover:opacity-80 transition">
-                    <i class="fas fa-building mr-2"></i> Propriétaires
-                </a>
-                <a href="{{ route('admin.users', ['role' => 'admin']) }}" 
-                   class="px-4 py-2 rounded-lg {{ request('role') === 'admin' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700' }} hover:opacity-80 transition">
-                    <i class="fas fa-shield-alt mr-2"></i> Administrateurs
-                </a>
-            </div>
+        <div class="glass-card bg-white p-4 rounded-2xl mb-8 flex flex-wrap gap-3 animate-fade-in shadow-sm border border-white/60">
+            <a href="{{ route('admin.users') }}" 
+               class="px-5 py-2.5 rounded-xl font-bold transition-all {{ !request('role') ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/20' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <i class="fas fa-list mr-2"></i> Tous
+            </a>
+            <a href="{{ route('admin.users', ['role' => 'user']) }}" 
+               class="px-5 py-2.5 rounded-xl font-bold transition-all {{ request('role') === 'user' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600' }}">
+                <i class="fas fa-user mr-2"></i> Utilisateurs
+            </a>
+            <a href="{{ route('admin.users', ['role' => 'owner']) }}" 
+               class="px-5 py-2.5 rounded-xl font-bold transition-all {{ request('role') === 'owner' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' : 'bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-600' }}">
+                <i class="fas fa-building mr-2"></i> Propriétaires
+            </a>
+            <a href="{{ route('admin.users', ['role' => 'admin']) }}" 
+               class="px-5 py-2.5 rounded-xl font-bold transition-all {{ request('role') === 'admin' ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600' }}">
+                <i class="fas fa-shield-alt mr-2"></i> Administrateurs
+            </a>
         </div>
         
         @if($users->count() > 0)
             <!-- Liste des utilisateurs -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
+            <div class="glass-card bg-white rounded-3xl shadow-sm border border-white/60 overflow-hidden animate-fade-in">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Utilisateur
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Rôle
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Contact
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Stats
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Statut
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                                <th class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rôle</th>
+                                <th class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stats</th>
+                                <th class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+                                <th class="px-6 py-5 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y divide-gray-100">
                             @foreach($users as $user)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-accent rounded-full flex items-center justify-center text-white font-bold mr-3">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
+                                <tr class="hover:bg-gray-50/80 transition group">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-4">
+                                            @if($user->avatar)
+                                                <div class="relative">
+                                                    <img src="{{ asset('storage/' . $user->avatar) }}" 
+                                                         alt="{{ $user->name }}"
+                                                         class="w-12 h-12 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform">
+                                                </div>
+                                            @else
+                                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-500 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform font-bold text-lg">
+                                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                </div>
+                                            @endif
+                                            
                                             <div>
-                                                <div class="text-sm font-medium text-dark">{{ $user->name }}</div>
-                                                <div class="text-sm text-gray-500">Inscrit {{ $user->created_at->format('d/m/Y') }}</div>
+                                                <p class="font-bold text-dark group-hover:text-primary transition-colors">{{ $user->name }}</p>
+                                                <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    {{ $user->created_at->format('d/m/Y') }}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
-                                    
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4">
                                         @if($user->role === 'admin')
-                                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
-                                                <i class="fas fa-shield-alt mr-1"></i> Admin
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-700">
+                                                <i class="fas fa-shield-alt"></i> Admin
                                             </span>
                                         @elseif($user->role === 'owner')
-                                            <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
-                                                <i class="fas fa-building mr-1"></i> Propriétaire
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 text-purple-700">
+                                                <i class="fas fa-building"></i> Propriétaire
                                             </span>
                                         @else
-                                            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                                                <i class="fas fa-user mr-1"></i> Utilisateur
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-100 text-blue-700">
+                                                <i class="fas fa-user"></i> Utilisateur
                                             </span>
                                         @endif
                                     </td>
-                                    
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ $user->email }}</div>
-                                        @if($user->phone)
-                                            <div class="text-sm text-gray-500">{{ $user->phone }}</div>
-                                        @endif
-                                    </td>
-                                    
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">
-                                            <i class="fas fa-building text-accent mr-1"></i> 
-                                            {{ $user->accommodations_count }} hébergement(s)
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <i class="fas fa-calendar-check text-accent mr-1"></i>
-                                            {{ $user->reservations_count }} réservation(s)
+                                        <div class="flex flex-col">
+                                            <span class="text-gray-900 font-medium text-sm">{{ $user->email }}</span>
+                                            @if($user->phone)
+                                                <span class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                                    <i class="fas fa-phone-alt text-xs"></i> {{ $user->phone }}
+                                                </span>
+                                            @endif
                                         </div>
                                     </td>
-                                    
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                                {{ $user->accommodations_count }} hébergements
+                                            </span>
+                                            <span class="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                                {{ $user->reservations_count }} réservations
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
                                         @if($user->is_active)
-                                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                                                <i class="fas fa-check-circle mr-1"></i> Actif
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-green-100 text-green-700">
+                                                <i class="fas fa-check-circle"></i> Actif
                                             </span>
                                         @else
-                                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
-                                                <i class="fas fa-ban mr-1"></i> Désactivé
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-700">
+                                                <i class="fas fa-ban"></i> Désactivé
                                             </span>
                                         @endif
                                     </td>
-                                    
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-4 text-right">
                                         @if($user->id !== auth()->id())
-                                            <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
+                                            <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline-block">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" 
-                                                        class="text-accent hover:text-dark transition">
-                                                    @if($user->is_active)
-                                                        <i class="fas fa-ban mr-1"></i> Désactiver
-                                                    @else
-                                                        <i class="fas fa-check mr-1"></i> Activer
-                                                    @endif
+                                                        class="w-8 h-8 rounded-lg flex items-center justify-center transition shadow-sm {{ $user->is_active ? 'bg-red-100 text-red-600 hover:bg-red-500 hover:text-white' : 'bg-green-100 text-green-600 hover:bg-green-500 hover:text-white' }}"
+                                                        title="{{ $user->is_active ? 'Désactiver' : 'Activer' }}">
+                                                    <i class="fas fa-{{ $user->is_active ? 'ban' : 'check' }} text-xs"></i>
                                                 </button>
                                             </form>
                                         @else
-                                            <span class="text-gray-400">Vous</span>
+                                            <span class="inline-block px-3 py-1 bg-gray-100 text-gray-400 rounded-lg text-xs font-bold border border-gray-200 cursor-not-allowed">
+                                                Vous
+                                            </span>
                                         @endif
                                     </td>
                                 </tr>
@@ -174,10 +191,15 @@
                 {{ $users->links() }}
             </div>
         @else
-            <div class="bg-white rounded-xl shadow-lg p-12 text-center fade-in">
-                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-2xl font-bold text-gray-700 mb-2">Aucun utilisateur</h3>
-                <p class="text-gray-600">Aucun utilisateur ne correspond à ces critères</p>
+            <div class="glass-card bg-white rounded-3xl p-12 text-center border border-white/60 shadow-sm">
+                <div class="w-24 h-24 mx-auto mb-6 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
+                    <i class="fas fa-users text-5xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-dark mb-2">Aucun utilisateur trouvé</h3>
+                <p class="text-gray-500">Essayez de modifier vos critères de recherche.</p>
+                <a href="{{ route('admin.users') }}" class="inline-block mt-4 text-primary font-bold hover:underline">
+                    Réinitialiser les filtres
+                </a>
             </div>
         @endif
     </div>

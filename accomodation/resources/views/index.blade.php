@@ -10,13 +10,13 @@
     <div class="absolute inset-0 opacity-20">
         <div class="absolute top-20 left-10 w-72 h-72 bg-secondary rounded-full blur-3xl animate-float"></div>
         <div class="absolute top-40 right-20 w-96 h-96 bg-white rounded-full blur-3xl animate-float" style="animation-delay: 3s"></div>
-        <div class="absolute bottom-20 left-40 w-80 h-80 bg-neutral rounded-full blur-3xl animate-float" style="animation-delay: 6s"></div>
+        <div class="absolute bottom-20 left-40 w-80 h-80 bg-accent rounded-full blur-3xl animate-float" style="animation-delay: 6s"></div>
     </div>
     
     <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-4xl mx-auto text-center animate-fade-in">
             <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Trouvez votre <span class="text-secondary">hébergement idéal</span><br>
+                Trouvez votre <span class="text-accent">hébergement idéal</span><br>
                 à Ngaoundéré
             </h1>
             <p class="text-xl md:text-2xl mb-12 text-gray-100">
@@ -24,18 +24,18 @@
             </p>
             
             <!-- Barre de recherche glassmorphique -->
-            <div class="backdrop-blur-lg bg-white/90 rounded-3xl shadow-2xl p-6 md:p-8 animate-scale-in border border-white/20">
+            <div class="backdrop-blur-lg bg-white/20 rounded-3xl shadow-2xl p-6 md:p-8 animate-scale-in border border-white/20">
                 <form action="{{ route('accommodations.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral"></i>
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                         <input 
                             type="text" 
                             name="search" 
                             placeholder="Rechercher un hébergement..." 
-                            class="input-neomorphism w-full pl-12 pr-4 py-4 rounded-2xl text-gray-800"
+                            class="input-glass w-full pl-12 pr-4 py-4 rounded-2xl text-gray-800 placeholder-gray-500 bg-white/80"
                         >
                     </div>
-                    <button type="submit" class="btn-neomorphism-secondary text-white px-10 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 whitespace-nowrap">
+                    <button type="submit" class="btn-secondary text-white px-10 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 whitespace-nowrap hover-lift">
                         <i class="fas fa-search"></i>
                         <span>Rechercher</span>
                     </button>
@@ -43,14 +43,14 @@
                 
                 <!-- Suggestions rapides -->
                 <div class="mt-6 flex flex-wrap gap-3 justify-center">
-                    <span class="text-gray-600 text-sm font-medium">Recherches populaires:</span>
-                    <a href="{{ route('accommodations.index', ['search' => 'hôtel']) }}" class="badge-soft px-4 py-2 rounded-full text-sm font-medium text-primary">
+                    <span class="text-white/80 text-sm font-medium">Recherches populaires:</span>
+                    <a href="{{ route('accommodations.index', ['search' => 'hôtel']) }}" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-sm font-medium text-white transition-colors">
                         Hôtels
                     </a>
-                    <a href="{{ route('accommodations.index', ['search' => 'appartement']) }}" class="badge-soft px-4 py-2 rounded-full text-sm font-medium text-primary">
+                    <a href="{{ route('accommodations.index', ['search' => 'appartement']) }}" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-sm font-medium text-white transition-colors">
                         Appartements
                     </a>
-                    <a href="{{ route('accommodations.index', ['search' => 'auberge']) }}" class="badge-soft px-4 py-2 rounded-full text-sm font-medium text-primary">
+                    <a href="{{ route('accommodations.index', ['search' => 'auberge']) }}" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-sm font-medium text-white transition-colors">
                         Auberges
                     </a>
                 </div>
@@ -71,28 +71,28 @@
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div class="text-center animate-fade-in">
-                <div class="card-neomorphism w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
+                <div class="glass-card bg-white w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
                     <i class="fas fa-home text-3xl text-secondary"></i>
                 </div>
                 <div class="text-4xl font-bold text-primary mb-2">500+</div>
                 <div class="text-gray-600 font-medium">Hébergements</div>
             </div>
             <div class="text-center animate-fade-in" style="animation-delay: 0.1s">
-                <div class="card-neomorphism w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
+                <div class="glass-card bg-white w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
                     <i class="fas fa-users text-3xl text-secondary"></i>
                 </div>
                 <div class="text-4xl font-bold text-primary mb-2">2000+</div>
                 <div class="text-gray-600 font-medium">Clients Satisfaits</div>
             </div>
             <div class="text-center animate-fade-in" style="animation-delay: 0.2s">
-                <div class="card-neomorphism w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
+                <div class="glass-card bg-white w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
                     <i class="fas fa-star text-3xl text-secondary"></i>
                 </div>
                 <div class="text-4xl font-bold text-primary mb-2">4.8/5</div>
                 <div class="text-gray-600 font-medium">Note Moyenne</div>
             </div>
             <div class="text-center animate-fade-in" style="animation-delay: 0.3s">
-                <div class="card-neomorphism w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
+                <div class="glass-card bg-white w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center">
                     <i class="fas fa-calendar-check text-3xl text-secondary"></i>
                 </div>
                 <div class="text-4xl font-bold text-primary mb-2">5000+</div>
@@ -115,12 +115,12 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             @foreach($categories as $category)
             <a href="{{ route('accommodations.index', ['category' => $category->id]) }}" 
-               class="card-neomorphism rounded-2xl p-8 text-center group">
+               class="glass-card bg-gray-50 hover:bg-white rounded-2xl p-8 text-center group transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
                     <i class="fas fa-{{ $category->icon ?? 'building' }} text-primary"></i>
                 </div>
                 <h3 class="text-xl font-bold text-dark mb-3 group-hover:text-secondary transition-colors">{{ $category->name }}</h3>
-                <div class="badge-soft inline-flex items-center justify-center px-4 py-1 rounded-full text-sm text-primary font-semibold">
+                <div class="bg-primary/10 inline-flex items-center justify-center px-4 py-1 rounded-full text-sm text-primary font-semibold">
                     {{ $category->accommodations_count ?? 0 }} <i class="fas fa-home ml-2 text-xs"></i>
                 </div>
             </a>
@@ -140,14 +140,14 @@
                 </h2>
                 <p class="text-gray-600 text-lg">Les meilleures offres du moment</p>
             </div>
-            <a href="{{ route('accommodations.index') }}" class="hidden md:flex items-center gap-2 text-primary hover:text-secondary transition-colors font-semibold hover-lift-subtle">
+            <a href="{{ route('accommodations.index') }}" class="hidden md:flex items-center gap-2 text-primary hover:text-secondary transition-colors font-semibold hover-lift">
                 Voir tout <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             @foreach($popularAccommodations as $accommodation)
-            <div class="card-neomorphism rounded-3xl overflow-hidden group">
+            <div class="glass-card bg-white rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
                 <!-- Image -->
                 <div class="relative h-56 bg-gray-200 overflow-hidden">
                     @if($accommodation->primary_image)
@@ -156,7 +156,7 @@
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                     @else
                         <div class="w-full h-full flex items-center justify-center">
-                            <i class="fas fa-image text-7xl text-neutral"></i>
+                            <i class="fas fa-image text-7xl text-gray-300"></i>
                         </div>
                     @endif
                     
@@ -167,7 +167,7 @@
                     </div>
                     
                     <!-- Badge favori -->
-                    <div class="absolute top-4 right-4 card-neomorphism w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
+                    <div class="absolute top-4 right-4 glass-card bg-white w-10 h-10 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
                         <i class="far fa-heart text-primary"></i>
                     </div>
                 </div>
@@ -184,21 +184,21 @@
                     </div>
                     
                     <!-- Infos avec icônes -->
-                    <div class="flex items-center gap-4 text-sm text-gray-600 mb-5 pb-5 border-b border-neutral border-opacity-20">
+                    <div class="flex items-center gap-4 text-sm text-gray-600 mb-5 pb-5 border-b border-gray-100">
                         <div class="flex items-center gap-1">
-                            <div class="card-inset w-8 h-8 rounded-lg flex items-center justify-center">
+                            <div class="bg-gray-50 w-8 h-8 rounded-lg flex items-center justify-center border border-gray-100">
                                 <i class="fas fa-bed text-secondary text-sm"></i>
                             </div>
                             <span class="font-semibold">{{ $accommodation->nb_beds }}</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <div class="card-inset w-8 h-8 rounded-lg flex items-center justify-center">
+                            <div class="bg-gray-50 w-8 h-8 rounded-lg flex items-center justify-center border border-gray-100">
                                 <i class="fas fa-users text-secondary text-sm"></i>
                             </div>
                             <span class="font-semibold">{{ $accommodation->max_guests }}</span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <div class="card-inset w-8 h-8 rounded-lg flex items-center justify-center">
+                            <div class="bg-gray-50 w-8 h-8 rounded-lg flex items-center justify-center border border-gray-100">
                                 <i class="fas fa-bath text-secondary text-sm"></i>
                             </div>
                             <span class="font-semibold">{{ $accommodation->nb_bathrooms }}</span>
@@ -211,14 +211,14 @@
                             <div class="text-3xl font-bold text-primary">{{ number_format($accommodation->price_per_night, 0, ',', ' ') }}</div>
                             <div class="text-gray-600 text-sm">FCFA / nuit</div>
                         </div>
-                        <div class="flex items-center gap-1 badge-soft px-3 py-2 rounded-xl bg-yellow-50 border-yellow-200">
+                        <div class="flex items-center gap-1 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-100">
                             <i class="fas fa-star text-yellow-500"></i>
                             <span class="font-bold text-dark">{{ number_format($accommodation->average_rating, 1) }}</span>
                         </div>
                     </div>
                     
                     <a href="{{ route('accommodations.show', $accommodation->id) }}" 
-                       class="btn-neomorphism-secondary w-full text-white text-center py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                       class="btn-secondary w-full text-white text-center py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover-lift">
                         <i class="fas fa-eye"></i> Voir les détails
                     </a>
                 </div>
@@ -248,7 +248,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div class="text-center group animate-fade-in">
                 <div class="relative inline-block mb-6">
-                    <div class="card-neomorphism w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300">
+                    <div class="glass-card bg-gray-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300 group-hover:bg-white group-hover:shadow-lg">
                         <i class="fas fa-search-location text-5xl text-secondary"></i>
                     </div>
                 </div>
@@ -260,7 +260,7 @@
             
             <div class="text-center group animate-fade-in" style="animation-delay: 0.1s">
                 <div class="relative inline-block mb-6">
-                    <div class="card-neomorphism w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300">
+                    <div class="glass-card bg-gray-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300 group-hover:bg-white group-hover:shadow-lg">
                         <i class="fas fa-shield-alt text-5xl text-primary"></i>
                     </div>
                 </div>
@@ -272,7 +272,7 @@
             
             <div class="text-center group animate-fade-in" style="animation-delay: 0.2s">
                 <div class="relative inline-block mb-6">
-                    <div class="card-neomorphism w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300">
+                    <div class="glass-card bg-gray-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300 group-hover:bg-white group-hover:shadow-lg">
                         <i class="fas fa-headset text-5xl text-secondary"></i>
                     </div>
                 </div>
@@ -307,11 +307,11 @@
                 Rejoignez notre plateforme et augmentez votre visibilité auprès de milliers de voyageurs !
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
-                <a href="{{ route('register') }}" class="btn-neomorphism-secondary inline-flex items-center justify-center gap-3 bg-secondary text-white px-10 py-5 rounded-2xl font-bold text-lg">
+                <a href="{{ route('register') }}" class="btn-secondary inline-flex items-center justify-center gap-3 bg-secondary text-white px-10 py-5 rounded-2xl font-bold text-lg hover-lift">
                     <i class="fas fa-plus-circle text-2xl"></i>
                     <span>Publier mon hébergement</span>
                 </a>
-                <a href="#" class="inline-flex items-center justify-center gap-3 backdrop-blur-lg bg-white/10 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white/20 transition-all duration-300 border-2 border-white/30">
+                <a href="#" class="inline-flex items-center justify-center gap-3 backdrop-blur-lg bg-white/10 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white/20 transition-all duration-300 border-2 border-white/30 hover-lift">
                     <i class="fas fa-info-circle text-2xl"></i>
                     <span>En savoir plus</span>
                 </a>
